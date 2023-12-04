@@ -1,0 +1,178 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_BOOKS 100
+#define MAX_TITLE_LENGTH 50
+#define MAX_AUTHORS_LENGTH 50
+#define MAX_PRESS_LENGTH 50
+
+typedef struct {
+    char title[MAX_TITLE_LENGTH];
+    char authors[MAX_AUTHORS_LENGTH];
+    char press[MAX_PRESS_LENGTH];
+    int page;
+    int price;
+    char borrow[12];
+} Book;
+
+Book books[MAX_BOOKS] = {
+   {"Truth", "John", "Century", 300, 20000, "available"},
+    {"Love", "Paul", "Goods", 200, 15000, "available"},
+    {"Joy", "James", "cookie", 250, 18000, "available"},
+    {"Thanks", "Mark", "Saejong", 240, 21000, "available"},
+    {"God", "Johnson", "Jungjo", 450, 35000, "available"}
+};
+
+int numBooks = 5;
+
+int strcasecmp_custom(const char* s1, const char* s2) {
+    while (*s1 && *s2) {
+        int diff = tolower(*s1) - tolower(*s2);
+        if (diff != 0) {
+            return diff;
+        }
+        s1++;
+        s2++;
+    }
+    return *s1 - *s2;
+}
+
+void displayBooks() {
+    printf("\nTitle\tAuthors\tPress\tPage\tPrice\tborrow\n");
+    printf("------------------------------------------------\n");
+    for (int i = 0; i < numBooks; ++i) {
+        printf("%s\t%s\t%s\t%d\t%d\t%s\n", books[i].title, books[i].authors, books[i].press,
+            books[i].page, books[i].price, books[i].borrow);
+    }
+}
+
+void searchBook() {
+    char searchTitle[MAX_TITLE_LENGTH];
+    printf("검색할 책의 제목을 입력하세요: ");
+    scanf("%s", searchTitle);
+
+    int found = 0;
+    printf("\nTitle\tAuthors\tPress\tPage\tPrice\tborrow\n");
+    printf("------------------------------------------------\n");
+
+    for (int i = 0; searchTitle[i] != '\0'; ++i) {
+        searchTitle[i] = tolower(searchTitle[i]);
+    }
+
+    for (int i = 0; i < numBooks; ++i) {
+        char tempTitle[MAX_TITLE_LENGTH];
+        strcpy(tempTitle, books[i].title);
+
+        for (int j = 0; tempTitle[j] != '\0'; ++j) {
+            tempTitle[j] = tolower(tempTitle[j]);
+        }
+
+        if (strstr(tempTitle, searchTitle) != NULL) {
+            printf("%s\t%s\t%s\t%d\t%d\tavailable\n", books[i].title, books[i].authors,
+                books[i].press, books[i].page, books[i].price);
+            found = 1;
+        }
+    }
+
+    if (!found) {
+        printf("해당하는 책이 없습니다.\n");
+    }
+}
+
+void borrowBook() {
+    char borrowTitle[MAX_TITLE_LENGTH];
+    printf("대출할 책의 제목을 입력하세요: ");
+    scanf("%s", borrowTitle);
+
+    int found = 0;
+    for (int i = 0; i < numBooks; ++i) {
+        if (strcasecmp_custom(books[i].title, borrowTitle) == 0) {
+            if (strcmp(books[i].borrow, "available") == 0) {
+                printf("대출 되었습니다.\n");
+                strcpy(books[i].borrow, "borrowing");
+            }
+            else {
+                printf("대출 중이라 대출 할 수 없습니다.\n");
+            }
+            found = 1;
+            break;
+        }
+    }
+
+    if (!found) {
+        printf("해당하는 책이 없거나 보유하고 있지 않습니다.\n");
+    }
+}
+
+void returnBook() {
+    char returnTitle[MAX_TITLE_LENGTH];
+    printf("반납할 책의 제목을 입력하세요: ");
+    scanf("%s", returnTitle);
+
+    int found = 0;
+    for (int i = 0; i < numBooks; ++i) {
+        if (strcasecmp_custom(books[i].title, returnTitle) == 0) {
+            if (strcmp(books[i].borrow, "borrowing") == 0) {
+                printf("책이 반납 되었습니다.\n");
+                strcpy(books[i].borrow, "available");
+            }
+            else {
+                printf("대출 되지 않은 책입니다.\n");
+            }
+            found = 1;
+            break;
+        }
+    }
+
+    if (!found) {
+        printf("해당하는 책이 없거나 보유하고 있지 않습니다.\n");
+    }
+}
+
+
+void showMenu() {
+    printf("메뉴를 선택하세요:\n");
+    printf("1. 도서목록\n");
+    printf("2. 검색\n");
+    printf("3. 대출\n");
+    printf("4. 반납\n");
+    printf("5. 종료\n");
+}
+
+int main() {
+    int choice = 0;
+
+    do {
+        showMenu();
+        printf("선택: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+        case 1:
+            printf("도서목록을 보여줍니다.\n");
+            displayBooks();
+            break;
+        case 2:
+            printf("검색할 도서를 선택하세요.\n");
+            searchBook();
+            break;
+        case 3:
+            printf("대출할 책의 이름을 선택하세요.\n");
+            borrowBook();
+            break;
+        case 4:
+            printf("반납할 책의 이름을 선택하세요.\n");
+            returnBook();
+            break;
+        case 5:
+            printf("프로그램을 종료합니다.\n");
+            break;
+        default:
+            printf("잘못된 선택입니다. 다시 선택해주세요.\n");
+        }
+    } while (choice != 5);
+
+    return 0;
+}
